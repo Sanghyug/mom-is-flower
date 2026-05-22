@@ -127,7 +127,6 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-between px-6 py-4 select-none">
       {/* 1단계: 메인 인트로 헤더 */}
       <header className="w-full text-center mt-4">
-
         <h1 className="text-2xl font-black text-slate-800 tracking-tight mt-3">
           엄마는 꽃 🌸
         </h1>
@@ -160,7 +159,7 @@ export default function App() {
             {/* HTML5 기본 파일 입력창을 투명하게 얹어 모바일 카메라/앨범 트리거 */}
             <label className="w-full py-5 bg-pink-500 text-white font-bold rounded-2xl shadow-lg shadow-pink-500/10 hover:bg-pink-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 text-base cursor-pointer">
               <Camera size={22} />
-              지금 사진 찍어 이름 찾기
+              사진 찍어 이름 찾기
               <input
                 type="file"
                 accept="image/*"
