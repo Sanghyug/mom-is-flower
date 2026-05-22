@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { Download, X, Share2, Pencil } from "lucide-react";
+import { useRef, useState } from "react";
+import { Download, X, Pencil } from "lucide-react";
 
 interface Props {
   imageSrc: string;
