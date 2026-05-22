@@ -3,6 +3,9 @@ import { Camera, Image as ImageIcon } from "lucide-react";
 import PolaroidResult from "./components/PolaroidResult";
 import FlowerArchiver from "./components/FlowerArchiver";
 
+// ⚠️ 테스트용 OpenAI API Key를 여기에 입력하세요. (챌린지 제출 전에는 백엔드나 환경변수로 숨겨야 합니다)
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || "";
+
 export default function App() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -12,31 +15,87 @@ export default function App() {
   } | null>(null);
   const [archive, setArchive] = useState<string[]>([]);
 
-  // 1단계: 토스 카메라/앨범 연동 시뮬레이션 핸들러
-  const handlePickImage = (type: "camera" | "album") => {
-    console.log(
-      `앱인토스 SDK 브릿지 실행: with-${type === "camera" ? "camera" : "album-photos"}`,
-    );
+  // 스마트폰 앨범/카메라 파일 선택 처리 핸들러
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // 1. 이미지 미리보기 처리 및 Base64 변환
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      setImageSrc(base64String); // 화면 표시용
+
+      // 2. 진짜 AI 분석 시작
+      await analyzeFlowerWithAI(base64String);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // OpenAI GPT-4o 멀티모달 API 연동 함수
+  const analyzeFlowerWithAI = async (base64Image: string) => {
+    if (!OPENAI_API_KEY || OPENAI_API_KEY.startsWith("여기에")) {
+      alert(
+        "OpenAI API Key가 설정되지 않았습니다! 코드를 열어 키를 입력해 주세요.",
+      );
+      return;
+    }
+
     setIsAnalyzing(true);
 
-    // 2단계: AI 멀티모달 분석 딜레이 연출 (2.5초)
-    setTimeout(() => {
-      // App.tsx 내부의 handlePickImage 내 mockFlowers 데이터 수정 버전
-      const mockFlowers = [
-        { name: "개망초", language: "가까이 있는 사람을 행복하게 해요" },
-        { name: "튤립", language: "당신을 향한 아름다운 사랑의 고백" },
-        { name: "민들레", language: "행복을 가득 안고 찾아갈게요" },
-      ];
-      const randomFlower =
-        mockFlowers[Math.floor(Math.random() * mockFlowers.length)];
+    try {
+      // 순수 Base64 데이터 추출
+      const pureBase64 = base64Image.split(",")[1];
 
-      // 테스트용 고화질 식물 이미지 샘플
-      setImageSrc(
-        "https://images.unsplash.com/photo-1560717789-0ac7c58ac90a?auto=format&fit=crop&w=600&q=80",
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o", // 이미지 분석이 가능한 최신 플래그십 모델
+            response_format: { type: "json_object" }, // 반드시 JSON으로 받기
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: '사진 속 식물이나 꽃의 이름을 한국어로 정확히 찾고, 그 꽃에 어울리는 다정하고 따뜻한 꽃말이나 위로의 문장을 한 줄(한국어)로 생성해줘. 반드시 다음과 같은 JSON 포맷으로만 응답해줘: {"name": "꽃이름", "language": "꽃말 또는 위로구문"}',
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:image/jpeg;base64,${pureBase64}`,
+                    },
+                  },
+                ],
+              },
+            ],
+          }),
+        },
       );
-      setFlowerData(randomFlower);
+
+      const result = await response.json();
+      const choiceMessage = result.choices[0].message.content;
+      const parsedData = JSON.parse(choiceMessage);
+
+      // 3. 받아온 진짜 데이터를 상태에 주입
+      setFlowerData({
+        name: parsedData.name,
+        language: parsedData.language,
+      });
+    } catch (error) {
+      console.error("AI 분석 실패:", error);
+      alert("꽃을 분석하는 도중 에러가 발생했습니다. 다시 시도해 주세요.");
+    } finally {
       setIsAnalyzing(false);
-    }, 2500);
+    }
   };
 
   const handleSaveToArchive = (savedImage: string) => {
@@ -61,8 +120,7 @@ export default function App() {
       {/* 2단계: 메인 액션 및 로딩 패널 */}
       <main className="w-full max-w-md flex flex-col items-center justify-center flex-1 py-8">
         {isAnalyzing ? (
-          <div className="flex flex-col items-center gap-4 text-center animate-in fade-in duration-300">
-            {/* 귀여운 꽃망울 핑 스피너 */}
+          <div className="flex flex-col items-center gap-4 text-center">
             <div className="relative flex h-14 w-14">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-14 w-14 bg-pink-500 items-center justify-center text-xl">
@@ -74,26 +132,35 @@ export default function App() {
                 AI가 꽃을 들여다보는 중
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                예쁜 이름과 꽃말을 피워내고 있어요...
+                실시간으로 진짜 꽃 이름을 분석하고 있어요...
               </p>
             </div>
           </div>
         ) : (
-          <div className="w-full flex flex-col gap-3.5">
-            <button
-              onClick={() => handlePickImage("camera")}
-              className="w-full py-5 bg-pink-500 text-white font-bold rounded-2xl shadow-lg shadow-pink-500/10 hover:bg-pink-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 text-base"
-            >
+          <div className="w-full flex flex-col gap-3.5 relative">
+            {/* HTML5 기본 파일 입력창을 투명하게 얹어 모바일 카메라/앨범 트리거 */}
+            <label className="w-full py-5 bg-pink-500 text-white font-bold rounded-2xl shadow-lg shadow-pink-500/10 hover:bg-pink-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 text-base cursor-pointer">
               <Camera size={22} />
               지금 사진 찍어 이름 찾기
-            </button>
-            <button
-              onClick={() => handlePickImage("album")}
-              className="w-full py-4.5 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200/80 shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 text-base"
-            >
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment" // 스마트폰에서 실행 시 후면 카메라 바로 구동
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </label>
+
+            <label className="w-full py-4.5 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200/80 shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 text-base cursor-pointer">
               <ImageIcon size={20} className="text-slate-400" />
               앨범에서 사진 가져오기
-            </button>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </label>
           </div>
         )}
       </main>
