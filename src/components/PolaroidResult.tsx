@@ -15,7 +15,7 @@ interface Props {
   flowerName: string;
   flowerLanguage: string;
   onClose: () => void;
-  onSaveToArchive: (savedImage: string) => void;
+  onSaveToArchive: (savedImage: string, memo?: string) => void;
 }
 
 export default function PolaroidResult({ imageSrc, flowerName, flowerLanguage, onClose, onSaveToArchive }: Props) {
@@ -63,7 +63,7 @@ export default function PolaroidResult({ imageSrc, flowerName, flowerLanguage, o
       const finalImageBase64 = await generatePolaroidBase64();
       
       // 도감 상태 업데이트 (앱 내부)
-      onSaveToArchive(finalImageBase64);
+      onSaveToArchive(finalImageBase64, memo);
 
       if (window.TossWebViewBridge) {
         // AX 규격: 공유 패널에 생성된 이미지 전달

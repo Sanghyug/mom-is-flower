@@ -3,6 +3,15 @@ import { Camera, Image as ImageIcon } from "lucide-react";
 import PolaroidResult from "./components/PolaroidResult";
 import FlowerArchiver from "./components/FlowerArchiver";
 
+export type FlowerCard = {
+  id: string;
+  image: string;
+  name: string;
+  language: string;
+  memo?: string;
+  createdAt: string;
+};
+
 // ⚠️ 테스트용 OpenAI API Key를 여기에 입력하세요. (챌린지 제출 전에는 백엔드나 환경변수로 숨겨야 합니다)
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || "";
 
@@ -13,7 +22,7 @@ export default function App() {
     name: string;
     language: string;
   } | null>(null);
-  const [archive, setArchive] = useState<string[]>([]);
+  const [archive, setArchive] = useState<FlowerCard[]>([]);
 
   // 스마트폰 앨범/카메라 파일 선택 처리 핸들러
   const handleFileChange = async (
@@ -98,17 +107,27 @@ export default function App() {
     }
   };
 
-  const handleSaveToArchive = (savedImage: string) => {
-    setArchive((prev) => [savedImage, ...prev]);
+  const handleSaveToArchive = (savedImage: string, memo?: string) => {
+    if (!flowerData) return;
+
+    setArchive((prev) => [
+      {
+        id: crypto.randomUUID(),
+        image: savedImage,
+        name: flowerData.name,
+        language: flowerData.language,
+        memo,
+        createdAt: new Date().toLocaleDateString("ko-KR"),
+      },
+      ...prev,
+    ]);
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-between p-6 select-none">
       {/* 1단계: 메인 인트로 헤더 */}
       <header className="w-full text-center mt-10">
-        <span className="text-xs bg-pink-100 text-pink-600 font-bold px-3 py-1 rounded-full">
-          Apps in Toss 챌린지 출품작
-        </span>
+
         <h1 className="text-2xl font-black text-slate-800 tracking-tight mt-3">
           엄마는 꽃 🌸
         </h1>
@@ -166,7 +185,12 @@ export default function App() {
       </main>
 
       {/* 하단 도감 히스토리 판 */}
-      <FlowerArchiver archive={archive} />
+      <FlowerArchiver
+        archive={archive}
+        onDelete={(id) =>
+          setArchive((prev) => prev.filter((card) => card.id !== id))
+        }
+      />
 
       {/* 3단계: 분석 완료 폴라로이드 팝업 모달 */}
       {flowerData && imageSrc && (
