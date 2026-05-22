@@ -46,16 +46,48 @@ export default function PolaroidResult({
         ctx.drawImage(img, 20, 20, 360, 360);
         ctx.fillStyle = "#1E293B";
         ctx.font = "bold 24px sans-serif";
-        ctx.fillText(flowerName, 24, 415);
+        ctx.fillStyle = "#64748B";
+        ctx.font = "bold 13px sans-serif";
+        ctx.fillText("꽃말", 24, 445);
+
         ctx.fillStyle = "#EC4899";
-        ctx.font = "medium 15px sans-serif";
-        ctx.fillText(`✨ ${flowerLanguage}`, 24, 445);
+        ctx.font = "bold 15px sans-serif";
+
+        const wrapText = (
+          text: string,
+          x: number,
+          y: number,
+          maxWidth: number,
+          lineHeight: number,
+        ) => {
+          let line = "";
+          const words = text.split("");
+
+          for (let i = 0; i < words.length; i++) {
+            const testLine = line + words[i];
+            const metrics = ctx.measureText(testLine);
+
+            if (metrics.width > maxWidth && i > 0) {
+              ctx.fillText(line, x, y);
+              line = words[i];
+              y += lineHeight;
+            } else {
+              line = testLine;
+            }
+          }
+
+          ctx.fillText(line, x, y);
+        };
+
+        wrapText(`✨ ${flowerLanguage}`, 24, 468, 340, 22);
         ctx.fillStyle = "#475569";
         ctx.font = "italic 16px sans-serif";
+        ctx.fillStyle = "#475569";
+        ctx.font = "italic 15px sans-serif";
         ctx.fillText(
           `✍️ ${memo.trim() || "예쁜 꽃을 마주친 행복한 날"}`,
           24,
-          485,
+          510,
         );
         ctx.fillStyle = "#94A3B8";
         ctx.font = "13px monospace";
@@ -67,7 +99,7 @@ export default function PolaroidResult({
           })
           .replace(/\. /g, ".")
           .slice(0, -1);
-        ctx.fillText(today, 295, 515);
+        ctx.fillText(today, 295, 525);
 
         resolve(canvas.toDataURL("image/png"));
       };
@@ -120,7 +152,9 @@ export default function PolaroidResult({
         return;
       }
 
-      alert("이 환경에서는 공유 기능을 사용할 수 없어요.");
+      alert(
+        "현재 브라우저에서는 공유창을 열 수 없어요. 토스 앱 안에서 다시 시도하거나, 이미지를 저장한 뒤 공유해 주세요.",
+      );
     } catch (error) {
       console.error("공유 중 오류:", error);
       alert("공유 중 오류가 발생했습니다.");
