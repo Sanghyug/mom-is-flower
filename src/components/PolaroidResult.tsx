@@ -106,7 +106,7 @@ export default function PolaroidResult({
           ctx.fillText(line, x, y);
         };
 
-        wrapText(`✨ ${flowerLanguage}`, 24, 468, 340, 22);
+        wrapText(`꽃말 ${flowerLanguage}`, 24, 468, 340, 22);
         ctx.fillStyle = "#475569";
         ctx.font = "italic 16px sans-serif";
         ctx.fillStyle = "#475569";

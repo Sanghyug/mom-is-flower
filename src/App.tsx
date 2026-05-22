@@ -191,6 +191,10 @@ export default function App() {
         }
       />
 
+      <footer className="mt-8 mb-6 text-center text-xs text-slate-400">
+        © 2026 엄마는 꽃 · Made with care by AI & React
+      </footer>
+
       {/* 3단계: 분석 완료 폴라로이드 팝업 모달 */}
       {flowerData && imageSrc && (
         <PolaroidResult
