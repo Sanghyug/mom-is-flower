@@ -11,16 +11,38 @@ export default function FlowerArchiver({ archive, onDelete }: Props) {
   const [selected, setSelected] = useState<FlowerCard | null>(null);
 
   const handleShare = async (card: FlowerCard) => {
-    if (navigator.share) {
-      await navigator.share({
-        title: card.name,
-        text: `${card.name}\n✨ ${card.language}`,
+    try {
+      const response = await fetch(card.image);
+      const blob = await response.blob();
+      const file = new File([blob], `${card.name}_card.png`, {
+        type: "image/png",
       });
-    } else {
-      const link = document.createElement("a");
-      link.href = card.image;
-      link.download = `${card.name}_card.png`;
-      link.click();
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: `${card.name} 꽃 카드`,
+          text: `꽃말: ${card.language}`,
+          files: [file],
+        });
+        return;
+      }
+
+      if (navigator.share) {
+        await navigator.share({
+          title: `${card.name} 꽃 카드`,
+          text: `${card.name}\n꽃말: ${card.language}${
+            card.memo ? `\n메모: ${card.memo}` : ""
+          }`,
+        });
+        return;
+      }
+
+      alert(
+        "현재 브라우저에서는 공유창을 열 수 없어요. 토스 앱 안에서 다시 시도하거나, 이미지를 저장한 뒤 공유해 주세요.",
+      );
+    } catch (error) {
+      console.error("사진첩 공유 중 오류:", error);
+      alert("공유 중 오류가 발생했습니다.");
     }
   };
 
@@ -78,20 +100,6 @@ export default function FlowerArchiver({ archive, onDelete }: Props) {
               alt={selected.name}
               className="w-full rounded-xl"
             />
-
-            <div className="mt-3">
-              <h3 className="text-lg font-bold text-slate-800">
-                {selected.name}
-              </h3>
-              <p className="text-sm text-pink-500 font-semibold mt-1">
-                ✨ {selected.language}
-              </p>
-              {selected.memo && (
-                <p className="text-sm text-slate-500 mt-2">
-                  ✍️ {selected.memo}
-                </p>
-              )}
-            </div>
 
             <div className="flex gap-3 mt-4">
               <button

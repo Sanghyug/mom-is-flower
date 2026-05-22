@@ -41,14 +41,41 @@ export default function PolaroidResult({
       img.src = imageSrc;
 
       img.onload = () => {
+        const drawCoverImage = (
+          ctx: CanvasRenderingContext2D,
+          img: HTMLImageElement,
+          x: number,
+          y: number,
+          w: number,
+          h: number,
+        ) => {
+          const imgRatio = img.width / img.height;
+          const boxRatio = w / h;
+
+          let sx = 0;
+          let sy = 0;
+          let sw = img.width;
+          let sh = img.height;
+
+          if (imgRatio > boxRatio) {
+            sw = img.height * boxRatio;
+            sx = (img.width - sw) / 2;
+          } else {
+            sh = img.width / boxRatio;
+            sy = (img.height - sh) / 2;
+          }
+
+          ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+        };
+
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, 400, 540);
-        ctx.drawImage(img, 20, 20, 360, 360);
+
+        drawCoverImage(ctx, img, 20, 20, 360, 360);
+
         ctx.fillStyle = "#1E293B";
         ctx.font = "bold 24px sans-serif";
-        ctx.fillStyle = "#64748B";
-        ctx.font = "bold 13px sans-serif";
-        ctx.fillText("꽃말", 24, 445);
+        ctx.fillText(flowerName, 24, 415);
 
         ctx.fillStyle = "#EC4899";
         ctx.font = "bold 15px sans-serif";
