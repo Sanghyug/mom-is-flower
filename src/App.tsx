@@ -80,6 +80,7 @@ export default function App() {
           },
           body: JSON.stringify({
             model: "gpt-4o", // 이미지 분석이 가능한 최신 플래그십 모델
+            temperature: 0,
             response_format: { type: "json_object" }, // 반드시 JSON으로 받기
             messages: [
               {

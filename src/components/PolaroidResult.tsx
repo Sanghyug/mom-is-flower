@@ -106,7 +106,7 @@ export default function PolaroidResult({
           ctx.fillText(line, x, y);
         };
 
-        wrapText(`꽃말 ${flowerLanguage}`, 24, 468, 340, 22);
+        wrapText(`꽃말 : ${flowerLanguage}`, 24, 468, 340, 22);
         ctx.fillStyle = "#475569";
         ctx.font = "italic 16px sans-serif";
         ctx.fillStyle = "#475569";
@@ -222,7 +222,7 @@ export default function PolaroidResult({
             </span>
           </div>
           <p className="text-sm text-pink-500 font-semibold">
-            ✨ {flowerLanguage}
+            꽃말 : {flowerLanguage}
           </p>
           <div className="mt-2 pt-2 border-t border-dashed border-slate-100">
             <p className="text-sm text-slate-600 font-medium italic min-h-[1.5rem]">
