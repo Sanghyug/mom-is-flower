@@ -124,9 +124,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-between p-6 select-none">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-between px-6 py-4 select-none">
       {/* 1단계: 메인 인트로 헤더 */}
-      <header className="w-full text-center mt-10">
+      <header className="w-full text-center mt-4">
 
         <h1 className="text-2xl font-black text-slate-800 tracking-tight mt-3">
           엄마는 꽃 🌸
@@ -137,7 +137,7 @@ export default function App() {
       </header>
 
       {/* 2단계: 메인 액션 및 로딩 패널 */}
-      <main className="w-full max-w-md flex flex-col items-center justify-center flex-1 py-8">
+      <main className="w-full max-w-md flex flex-col items-center justify-center flex-1 py-6">
         {isAnalyzing ? (
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="relative flex h-14 w-14">
