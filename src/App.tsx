@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Camera, Image as ImageIcon } from "lucide-react";
 import PolaroidResult from "./components/PolaroidResult";
 import FlowerArchiver from "./components/FlowerArchiver";
@@ -23,6 +23,18 @@ export default function App() {
     language: string;
   } | null>(null);
   const [archive, setArchive] = useState<FlowerCard[]>([]);
+
+  useEffect(() => {
+    const savedArchive = localStorage.getItem("mom-is-flower-archive");
+
+    if (savedArchive) {
+      setArchive(JSON.parse(savedArchive));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("mom-is-flower-archive", JSON.stringify(archive));
+  }, [archive]);
 
   // 스마트폰 앨범/카메라 파일 선택 처리 핸들러
   const handleFileChange = async (
